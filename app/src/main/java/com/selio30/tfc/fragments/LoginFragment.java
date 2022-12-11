@@ -22,6 +22,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.selio30.tfc.R;
 import com.selio30.tfc.utils.JSonConstants;
+import com.selio30.tfc.webservice.EmpleadoService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -81,6 +82,10 @@ public class LoginFragment extends Fragment {
                     progressBar.setVisibility(View.GONE);
 
                     if (response.equalsIgnoreCase("Login Success")) {
+
+                        EmpleadoService empleadoService = new EmpleadoService(getContext(), getView());
+                        empleadoService.read(username);
+
                         etUser.setText("");
                         etPass.setText("");
                         getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.ContainerView, new MenuFragment()).addToBackStack(null).commit();

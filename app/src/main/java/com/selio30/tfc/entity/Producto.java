@@ -22,6 +22,10 @@ public class Producto {
     @Ignore
     private String stock;
 
+    @Ignore
+    public Producto() {
+    }
+
     public Producto(@NonNull String id, String name, String id_tipo, String id_formato) {
         this.id = id;
         this.name = name;

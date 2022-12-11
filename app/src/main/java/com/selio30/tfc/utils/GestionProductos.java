@@ -1,18 +1,20 @@
 package com.selio30.tfc.utils;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
 
 import com.selio30.tfc.db.Database;
 import com.selio30.tfc.entity.Almacen;
+import com.selio30.tfc.entity.Empleado;
 import com.selio30.tfc.entity.Formato;
 import com.selio30.tfc.entity.Inventario;
 import com.selio30.tfc.entity.InventarioProducto;
@@ -27,6 +29,7 @@ import com.selio30.tfc.viewmodel.DatabaseViewModel;
 import com.selio30.tfc.viewmodel.ProductoViewModel;
 import com.selio30.tfc.viewmodel.VolleyViewModel;
 import com.selio30.tfc.webservice.AlmacenService;
+import com.selio30.tfc.webservice.EmpleadoService;
 import com.selio30.tfc.webservice.FormatoService;
 import com.selio30.tfc.webservice.InventarioProductoService;
 import com.selio30.tfc.webservice.InventarioService;
@@ -39,6 +42,7 @@ import com.selio30.tfc.webservice.TipoService;
 import com.selio30.tfc.webservice.UbicacionService;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -48,6 +52,7 @@ public class GestionProductos {
      * Atributos de la calse
      **/
     private MutableLiveData<List<Almacen>> almacenMutableListData;
+    private MutableLiveData<List<Empleado>> empleadoMutableListData;
     private MutableLiveData<List<Formato>> formatoMutableListData;
     private MutableLiveData<List<Inventario>> inventarioMutableListData;
     private MutableLiveData<List<InventarioProducto>> inventarioProductoMutableListData;
@@ -59,6 +64,7 @@ public class GestionProductos {
     private MutableLiveData<List<Tipo>> tipoMutableListData;
     private MutableLiveData<List<Ubicacion>> ubicacionMutableListData;
     private List<Almacen> almacenList;
+    private List<Empleado> empleadoList = new ArrayList<>();
     private List<Formato> formatoList;
     private List<Inventario> inventarioList;
     private List<InventarioProducto> inventarioProductoList;
@@ -70,14 +76,14 @@ public class GestionProductos {
     private List<Tipo> tipoList;
     private List<Ubicacion> ubicacionList;
 
-    private Almacen almacen;
+    private Almacen almacen = new Almacen();
     private Formato formato;
     private Inventario inventario;
     private InventarioProducto inventarioProducto;
     private Localizacion localizacion;
-    private Producto producto;
+    private Producto producto = new Producto();
     private ProductoAlmacen productoAlmacen;
-    private ProductoHabituales productoHabituales;
+    private ProductoHabituales productoHabituales = new ProductoHabituales();
     private ProductoUbicacion productoUbicacion;
     private Tipo tipo;
     private Ubicacion ubicacion;
@@ -92,6 +98,7 @@ public class GestionProductos {
     private View view;
 
     private AlmacenService almacenService;
+    private EmpleadoService empleadoService;
     private FormatoService formatoService;
     private InventarioService inventarioService;
     private InventarioProductoService inventarioProductoService;
@@ -142,38 +149,41 @@ public class GestionProductos {
             @Override
             public void run() {
                 super.run();
-                date = new Date();
 
-                String strDateFormat = "yyyy-MM-dd  HH:mm:ss";
-                SimpleDateFormat dateFormat = new SimpleDateFormat(strDateFormat);
-                Log.d("FECHA", dateFormat.format(date));
+                //Forma de obtención fecha actual con el siguiente formato (ej. 2022-12-01 10:00:00)
+                @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String fecha = sdf.format(new Date());
+                Log.d("FECHA", fecha);
 
-                inventario = new Inventario();
-                inventario.setId(database.inventarioDAO().getLastId() + 1);
-                Log.d("ID", String.valueOf(database.inventarioDAO().getLastId() + 1));
-                inventario.setFecha(dateFormat.format(date));
-                inventario.setId_localizacion("0");
-                Log.d("INV", String.valueOf(inventario));
+                MutableLiveData<List<Empleado>> listMutableLiveDataEmpleado = volleyViewModel.getEmpleados();
+                for (Empleado e : Objects.requireNonNull(listMutableLiveDataEmpleado.getValue())) {
+                    inventario = new Inventario(database.inventarioDAO().getLastId() + 1, fecha, String.valueOf(e.getId_localizacion()));
+                    Log.d("INV", String.valueOf(inventario));
+                }
 
                 try {
                     database.inventarioDAO().insert(inventario);
-                    //inventarioService.create(inventario);
+                    inventarioService.create(inventario);
 
-                    List<Producto> productos = database.productoDAO().getAll();
-                    Log.d("P", String.valueOf(productos));
-                    for (Producto p : productos) {
-                        if (!Objects.equals(p.getStock(), "0") && !Objects.equals(p.getStock(), "")) {
-                            inventarioProducto = new InventarioProducto(p.getId(), database.inventarioDAO().getLastId(), p.getStock(), "0");
-                            database.inventarioDAO().insertInventarioProducto(inventarioProducto);
+                    MutableLiveData<List<Ubicacion>> listMutableLiveData_DB = productoViewModel.getUbicacion_DB();
+                    Log.d("MUTLIST", String.valueOf(listMutableLiveData_DB.getValue()));
+                    for (Ubicacion u : Objects.requireNonNull(listMutableLiveData_DB.getValue())) {
+                        Log.d("UBI", String.valueOf(u));
+                        for (Producto p : u.getProductos()) {
+                            if (!Objects.equals(p.getStock(), "0") && !Objects.equals(p.getStock(), "")) {
+                                inventarioProducto = new InventarioProducto(p.getId(), inventario.getId(), p.getStock(), "0");
+                                inventarioProductoService.create(inventarioProducto);
+                                Log.d("PROD", String.valueOf(inventarioProducto));
+                            }
                         }
                     }
-                    Log.d("PROD", String.valueOf(inventarioProducto));
                 } catch (Exception e) {
                     Log.d("ERROR", e.getMessage());
                 }
             }
         };
         thread.start();
+        Toast.makeText(view.getContext(), "Inventario creado", Toast.LENGTH_SHORT).show();
     }
 
 
@@ -189,13 +199,16 @@ public class GestionProductos {
             @Override
             public void run() {
                 super.run();
-                List<Ubicacion> ubi = database.ubicacionDAO().getAll();
-                for (Ubicacion u : ubi) {
-
-                    List<Producto> productos = database.ubicacionDAO().getProductosUbicacionSelected(u.getId());
-                    if (productos.size() != 0) {
-                        u.setProductos(productos);
-                        listMutableLiveData_DB.getValue().add(u);
+                MutableLiveData<List<Empleado>> listMutableLiveDataEmpleado = volleyViewModel.getEmpleados();
+                for (Empleado e : Objects.requireNonNull(listMutableLiveDataEmpleado.getValue())) {
+                    List<Ubicacion> ubi = database.ubicacionDAO().getUbicaionAlmacen(e.getId_localizacion());
+                    for (Ubicacion u : ubi) {
+                        Log.d("UBICA", String.valueOf(u));
+                        List<Producto> productos = database.ubicacionDAO().getProductosUbicacionSelected(u.getId());
+                        if (productos.size() != 0) {
+                            u.setProductos(productos);
+                            listMutableLiveData_DB.getValue().add(u);
+                        }
                     }
                 }
                 listMutableLiveData_DB.postValue(listMutableLiveData_DB.getValue());
@@ -217,15 +230,19 @@ public class GestionProductos {
             @Override
             public void run() {
                 super.run();
-                List<Ubicacion> ubi = database.ubicacionDAO().getAll();
-                for (Ubicacion u : ubi) {
+                MutableLiveData<List<Empleado>> listMutableLiveDataEmpleado = volleyViewModel.getEmpleados();
+                for (Empleado e : Objects.requireNonNull(listMutableLiveDataEmpleado.getValue())) {
+                    List<Ubicacion> ubi = database.ubicacionDAO().getUbicaionAlmacen(e.getId_localizacion());
+                    for (Ubicacion u : ubi) {
 
-                    List<Producto> productos = database.ubicacionDAO().getProductosUbicacionSelected(u.getId());
-                    if (productos.size() != 0 && Objects.equals(producto.getId(), productoHabituales.getId_producto())) {
-                        u.setProductos(productos);
-                        listMutableLiveData_DB.getValue().add(u);
+                        List<Producto> productos = database.ubicacionDAO().getProductgoUbicacionHabitual(u.getId(), e.getId_localizacion());
+                        if (productos.size() != 0 && Objects.equals(producto.getId(), productoHabituales.getId_producto())) {
+                            u.setProductos(productos);
+                            listMutableLiveData_DB.getValue().add(u);
+                        }
                     }
                 }
+                Log.d("PRHB", String.valueOf(listMutableLiveData_DB.getValue()));
                 listMutableLiveData_DB.postValue(listMutableLiveData_DB.getValue());
                 productoViewModel.setUbicacion_DB(listMutableLiveData_DB);
             }
@@ -242,12 +259,7 @@ public class GestionProductos {
     public void getRemoteAlmacen() {
         almacenService.read();
 
-        volleyViewModel.getAlmacens().observe((LifecycleOwner) activity, new Observer<List<Almacen>>() {
-            @Override
-            public void onChanged(List<Almacen> almacens) {
-                insertAlmacenRoom();
-            }
-        });
+        volleyViewModel.getAlmacens().observe((LifecycleOwner) activity, almacens -> insertAlmacenRoom());
     }
 
 
@@ -257,12 +269,7 @@ public class GestionProductos {
     public void getRemoteFormato() {
         formatoService.read();
 
-        volleyViewModel.getFormatos().observe((LifecycleOwner) activity, new Observer<List<Formato>>() {
-            @Override
-            public void onChanged(List<Formato> formatoes) {
-                insertFormatoRoom();
-            }
-        });
+        volleyViewModel.getFormatos().observe((LifecycleOwner) activity, formatoes -> insertFormatoRoom());
     }
 
     /**
@@ -271,26 +278,7 @@ public class GestionProductos {
     public void getRemoteInventario() {
         inventarioService.read();
 
-        volleyViewModel.getInventarios().observe((LifecycleOwner) activity, new Observer<List<Inventario>>() {
-            @Override
-            public void onChanged(List<Inventario> inventarios) {
-                insertInventarioRoom();
-            }
-        });
-    }
-
-    /**
-     * Metodo que llama al metodo de la clase InventarioProductos que trae los registros
-     */
-    public void getRemoteInventarioProducto() {
-        inventarioProductoService.read();
-
-        volleyViewModel.getInventarioproductos().observe((LifecycleOwner) activity, new Observer<List<InventarioProducto>>() {
-            @Override
-            public void onChanged(List<InventarioProducto> inventarioProductos) {
-                insertInventarioProductoRoom();
-            }
-        });
+        volleyViewModel.getInventarios().observe((LifecycleOwner) activity, inventarios -> insertInventarioRoom());
     }
 
     /**
@@ -299,12 +287,7 @@ public class GestionProductos {
     public void getRemoteLocalizacion() {
         localizacionService.read();
 
-        volleyViewModel.getLocalizacions().observe((LifecycleOwner) activity, new Observer<List<Localizacion>>() {
-            @Override
-            public void onChanged(List<Localizacion> localizacions) {
-                insertLocalizacionRoom();
-            }
-        });
+        volleyViewModel.getLocalizacions().observe((LifecycleOwner) activity, localizacions -> insertLocalizacionRoom());
     }
 
     /**
@@ -313,12 +296,7 @@ public class GestionProductos {
     public void getRemoteProducto() {
         productoService.read();
 
-        volleyViewModel.getProductos().observe((LifecycleOwner) activity, new Observer<List<Producto>>() {
-            @Override
-            public void onChanged(List<Producto> productos) {
-                insertProdRoom();
-            }
-        });
+        volleyViewModel.getProductos().observe((LifecycleOwner) activity, productos -> insertProdRoom());
     }
 
     /**
@@ -327,12 +305,7 @@ public class GestionProductos {
     public void getRemoteProductoAlmacen() {
         productoAlmacenService.read();
 
-        volleyViewModel.getProductoalmacens().observe((LifecycleOwner) activity, new Observer<List<ProductoAlmacen>>() {
-            @Override
-            public void onChanged(List<ProductoAlmacen> productoAlmacens) {
-                insertProdAlmRoom();
-            }
-        });
+        volleyViewModel.getProductoalmacens().observe((LifecycleOwner) activity, productoAlmacens -> insertProdAlmRoom());
     }
 
     /**
@@ -341,12 +314,7 @@ public class GestionProductos {
     public void getRemoteProductoHabitual() {
         productoHabitualService.read();
 
-        volleyViewModel.getProductohabituales().observe((LifecycleOwner) activity, new Observer<List<ProductoHabituales>>() {
-            @Override
-            public void onChanged(List<ProductoHabituales> productoHabituales) {
-                insertProdHabiRoom();
-            }
-        });
+        volleyViewModel.getProductohabituales().observe((LifecycleOwner) activity, productoHabituales -> insertProdHabiRoom());
     }
 
     /**
@@ -355,12 +323,7 @@ public class GestionProductos {
     public void getRemoteProductoUbicacion() {
         productoUbicacionService.read();
 
-        volleyViewModel.getProductoubicacions().observe((LifecycleOwner) activity, new Observer<List<ProductoUbicacion>>() {
-            @Override
-            public void onChanged(List<ProductoUbicacion> productoUbicacions) {
-                insertProdUbiRoom();
-            }
-        });
+        volleyViewModel.getProductoubicacions().observe((LifecycleOwner) activity, productoUbicacions -> insertProdUbiRoom());
     }
 
     /**
@@ -369,12 +332,7 @@ public class GestionProductos {
     public void getRemoteTipo() {
         tipoService.read();
 
-        volleyViewModel.getTipos().observe((LifecycleOwner) activity, new Observer<List<Tipo>>() {
-            @Override
-            public void onChanged(List<Tipo> tipos) {
-                insertTipoRoom();
-            }
-        });
+        volleyViewModel.getTipos().observe((LifecycleOwner) activity, tipos -> insertTipoRoom());
     }
 
     /**
@@ -383,12 +341,7 @@ public class GestionProductos {
     public void getRemoteUbicacion() {
         ubicacionService.read();
 
-        volleyViewModel.getUbicacions().observe((LifecycleOwner) activity, new Observer<List<Ubicacion>>() {
-            @Override
-            public void onChanged(List<Ubicacion> ubicacions) {
-                insertUbiRoom();
-            }
-        });
+        volleyViewModel.getUbicacions().observe((LifecycleOwner) activity, ubicacions -> insertUbiRoom());
     }
 
     /** Inserción de registros **/

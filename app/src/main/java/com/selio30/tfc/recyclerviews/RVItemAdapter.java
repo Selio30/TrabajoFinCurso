@@ -34,22 +34,6 @@ public class RVItemAdapter extends RecyclerView.Adapter<RVItemAdapter.ItemViewHo
     private ProductoViewModel model;
 
     //generate constructor
-    public RVItemAdapter(Context mCntext, List<Ubicacion> mList, List<Producto> list) {
-        this.mCntext = mCntext;
-        this.mList = mList;
-        this.list = list;
-        this.mInflater = LayoutInflater.from(mCntext);
-        this.model = new ViewModelProvider(((FragmentActivity) mCntext)).get(ProductoViewModel.class);
-    }
-
-    public RVItemAdapter(Context mCntext, List<Ubicacion> mList, int size) {
-        this.mCntext = mCntext;
-        this.mList = mList;
-        this.size = size;
-        this.mInflater = LayoutInflater.from(mCntext);
-        this.model = new ViewModelProvider(((FragmentActivity) mCntext)).get(ProductoViewModel.class);
-    }
-
     public RVItemAdapter(Context mCntext, List<Ubicacion> mList) {
         this.mCntext = mCntext;
         this.mList = mList;

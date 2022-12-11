@@ -11,6 +11,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.selio30.tfc.entity.Almacen;
+import com.selio30.tfc.entity.Empleado;
 import com.selio30.tfc.entity.Formato;
 import com.selio30.tfc.entity.Inventario;
 import com.selio30.tfc.entity.InventarioProducto;
@@ -28,6 +29,7 @@ import java.util.List;
 public class VolleyViewModel extends AndroidViewModel {
     private RequestQueue requestQueue;
     private MutableLiveData<List<Almacen>> almacens;
+    private MutableLiveData<List<Empleado>> empleados;
     private MutableLiveData<List<Formato>> formatos;
     private MutableLiveData<List<Inventario>> inventarios;
     private MutableLiveData<List<InventarioProducto>> inventarioproductos;
@@ -64,6 +66,18 @@ public class VolleyViewModel extends AndroidViewModel {
 
     public void setAlmacens(MutableLiveData<List<Almacen>> almacens) {
         this.almacens = almacens;
+    }
+
+    public MutableLiveData<List<Empleado>> getEmpleados() {
+        if (empleados == null) {
+            empleados = new MutableLiveData<>();
+            empleados.setValue(new ArrayList<>());
+        }
+        return empleados;
+    }
+
+    public void setEmpleados(MutableLiveData<List<Empleado>> empleados) {
+        this.empleados = empleados;
     }
 
     public MutableLiveData<List<Formato>> getFormatos() {

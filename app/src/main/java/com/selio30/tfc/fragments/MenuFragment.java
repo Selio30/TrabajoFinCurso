@@ -69,13 +69,12 @@ public class MenuFragment extends Fragment {
         btnMedia.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                getActivity()
-//                        .getSupportFragmentManager()
-//                        .beginTransaction()
-//                        .replace(R.id.ContainerView, new ListHabitualesFragment())
-//                        .addToBackStack(null)
-//                        .commit();
-                Toast.makeText(getContext(), "Coming soon", Toast.LENGTH_SHORT).show();
+                getActivity()
+                        .getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.ContainerView, new ListHabitualesFragment())
+                        .addToBackStack(null)
+                        .commit();
             }
         });
     }
