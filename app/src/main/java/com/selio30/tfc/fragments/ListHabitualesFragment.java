@@ -1,10 +1,13 @@
 package com.selio30.tfc.fragments;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
@@ -25,6 +28,7 @@ import java.util.List;
 public class ListHabitualesFragment extends Fragment {
 
     private static final String TAG = "JSON";
+    private Button btnInsertar;
     private RecyclerView rv;
 
     private ProductoViewModel productoViewModel;
@@ -49,6 +53,7 @@ public class ListHabitualesFragment extends Fragment {
         prepareViewModel();
         prepareRecyclerView();
         initRecycler();
+        createButton();
     }
 
     private void prepareViewModel() {
@@ -76,6 +81,38 @@ public class ListHabitualesFragment extends Fragment {
             @Override
             public void onChanged(List<Ubicacion> ubicacions) {
                 rv.getAdapter().notifyDataSetChanged();
+            }
+        });
+    }
+
+    /**
+     * Accion del boton para añadir un inventario nuevo
+     */
+    private void createButton() {
+        GestionProductos gestionProductos = new GestionProductos(requireActivity(), requireActivity(), requireActivity(), requireView());
+        btnInsertar = getActivity().findViewById(R.id.btn_Inventario);
+
+        btnInsertar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder alert = new AlertDialog.Builder(getContext());
+                alert.setMessage("¿Desea realizar el inventario?")
+                        .setCancelable(false)
+                        .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                gestionProductos.addInventarioProductoHabitual();
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.cancel();
+                            }
+                        });
+                AlertDialog titulo = alert.create();
+                titulo.setTitle("Insert");
+                titulo.show();
             }
         });
     }

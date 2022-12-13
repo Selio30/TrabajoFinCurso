@@ -15,19 +15,19 @@ public class Inventario {
     @ColumnInfo(name = "fecha")
     private String fecha;
     @ColumnInfo(name = "id_localizacion")
-    private String id_localizacion;
+    private int id_localizacion;
 
     public Inventario() {
     }
 
     @Ignore
-    public Inventario(String fecha, String id_localizacion) {
+    public Inventario(String fecha, int id_localizacion) {
         this.fecha = fecha;
         this.id_localizacion = id_localizacion;
     }
 
     @Ignore
-    public Inventario(@NonNull int id, String fecha, String id_localizacion) {
+    public Inventario(@NonNull int id, String fecha, int id_localizacion) {
         this.id = id;
         this.fecha = fecha;
         this.id_localizacion = id_localizacion;
@@ -50,11 +50,11 @@ public class Inventario {
         this.fecha = fecha;
     }
 
-    public String getId_localizacion() {
+    public int getId_localizacion() {
         return id_localizacion;
     }
 
-    public void setId_localizacion(String id_localizacion) {
+    public void setId_localizacion(int id_localizacion) {
         this.id_localizacion = id_localizacion;
     }
 

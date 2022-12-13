@@ -48,8 +48,8 @@ public class InventarioProductoService {
 
     public void create(InventarioProducto inventarioProducto) {
         HashMap<String, String> map = new HashMap<>();
-        map.put("id_producto", inventarioProducto.getId_producto());
-        map.put("id_inventario", String.valueOf(inventarioProducto.getId_inventario()));
+        map.put("ID_producto", inventarioProducto.getId_producto());
+        map.put("ID_inventario", String.valueOf(inventarioProducto.getId_inventario()));
         map.put("stock", inventarioProducto.getStock());
         map.put("habitual", inventarioProducto.getHabitual());
 

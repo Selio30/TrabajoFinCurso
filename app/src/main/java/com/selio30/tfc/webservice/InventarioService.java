@@ -48,9 +48,9 @@ public class InventarioService {
 
     public void create(Inventario inventario) {
         HashMap<String, String> map = new HashMap<>();
-        map.put("id", String.valueOf(inventario.getId()));
+        map.put("ID", String.valueOf(inventario.getId()));
         map.put("fecha", inventario.getFecha());
-        map.put("id_localizacion", inventario.getId_localizacion());
+        map.put("ID_localizacion", String.valueOf(inventario.getId_localizacion()));
 
         JSONObject jsonObject = new JSONObject(map);
 

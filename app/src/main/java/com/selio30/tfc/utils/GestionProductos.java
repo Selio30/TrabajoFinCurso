@@ -157,7 +157,7 @@ public class GestionProductos {
 
                 MutableLiveData<List<Empleado>> listMutableLiveDataEmpleado = volleyViewModel.getEmpleados();
                 for (Empleado e : Objects.requireNonNull(listMutableLiveDataEmpleado.getValue())) {
-                    inventario = new Inventario(database.inventarioDAO().getLastId() + 1, fecha, String.valueOf(e.getId_localizacion()));
+                    inventario = new Inventario(database.inventarioDAO().getLastId() + 1, fecha, e.getId_localizacion());
                     Log.d("INV", String.valueOf(inventario));
                 }
 
@@ -186,6 +186,49 @@ public class GestionProductos {
         Toast.makeText(view.getContext(), "Inventario creado", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Inserción del inventario de productos habituales en la BBDD.
+     */
+    public void addInventarioProductoHabitual() {
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                try {
+                    //Forma de obtención fecha actual con el siguiente formato (ej. 2022-12-01 10:00:00)
+                    @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    String fecha = sdf.format(new Date());
+                    Log.d("FECHA", fecha);
+
+                    MutableLiveData<List<Empleado>> listMutableLiveDataEmpleado = volleyViewModel.getEmpleados();
+                    for (Empleado e : Objects.requireNonNull(listMutableLiveDataEmpleado.getValue())) {
+                        inventario = new Inventario(database.inventarioDAO().getLastId() + 1, fecha, e.getId_localizacion());
+                        Log.d("INV", String.valueOf(inventario));
+                    }
+
+                    database.inventarioDAO().insert(inventario);
+                    inventarioService.create(inventario);
+
+                    MutableLiveData<List<Ubicacion>> listMutableLiveData_DB = productoViewModel.getUbicacion_DB();
+                    Log.d("MUTLIST", String.valueOf(listMutableLiveData_DB.getValue()));
+                    for (Ubicacion u : Objects.requireNonNull(listMutableLiveData_DB.getValue())) {
+                        Log.d("UBI", String.valueOf(u));
+                        for (Producto p : u.getProductos()) {
+                            if (!Objects.equals(p.getStock(), "0") && !Objects.equals(p.getStock(), "")) {
+                                inventarioProducto = new InventarioProducto(p.getId(), inventario.getId(), p.getStock(), "1");
+                                inventarioProductoService.create(inventarioProducto);
+                                Log.d("PROD", String.valueOf(inventarioProducto));
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.d("ERROR", e.getMessage());
+                }
+            }
+        };
+        thread.start();
+        Toast.makeText(view.getContext(), "Inventario creado", Toast.LENGTH_SHORT).show();
+    }
 
     /**
      * Hacemos la busqueda de todas las peliculas de la tabla productos (Room).

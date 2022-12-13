@@ -23,10 +23,10 @@ public interface UbicacionDAO {
     @Query("SELECT * FROM ubicacion WHERE id_Ubicacion = :id")
     Ubicacion getById(String id);
 
-    @Query("SELECT p.id_Producto, p.nameProducto FROM ProductoUbicacion u INNER JOIN productos p ON u.id_Ubicacion = p.id_Producto WHERE u.id_Ubicacion = :id")
+    @Query("SELECT p.id_Producto, p.nameProducto FROM ProductoUbicacion u INNER JOIN productos p ON u.id_producto = p.id_Producto WHERE u.id_Ubicacion = :id")
     List<Producto> getProductosUbicacionSelected(String id);
 
-    @Query("SELECT p.id_producto, p.nameProducto, h.ID_producto FROM ProductoUbicacion u INNER JOIN productos p ON u.id_ubicacion = p.id_producto INNER JOIN productohabituales h ON h.id_producto = p.id_producto WHERE u.id_ubicacion = :id AND h.id_localizacion = :id_localizacion")
+    @Query("SELECT p.id_producto, p.nameProducto, h.ID_producto FROM ProductoUbicacion u INNER JOIN productos p ON u.id_producto = p.id_producto INNER JOIN productohabituales h ON h.id_producto = p.id_producto WHERE u.id_ubicacion = :id AND h.id_localizacion = :id_localizacion")
     List<Producto> getProductgoUbicacionHabitual(String id, int id_localizacion);
 
     @Query("SELECT u.id_ubicacion, u.id_almacen, u.nombreUbicacion FROM ubicacion u INNER JOIN almacen a ON a.id_almacen = u.id_almacen WHERE a.id_localizacion = :id_localizacion")

@@ -2,6 +2,7 @@ package com.selio30.tfc.utils;
 
 public class JSonConstants {
     public static final String BaseURL = "http://192.168.1.40/proyecto";
+    //public static final String BaseURL = "https://proyectsergio.000webhostapp.com";
 
     public static final String URL_LOGIN = BaseURL + "/php/login.php";
 

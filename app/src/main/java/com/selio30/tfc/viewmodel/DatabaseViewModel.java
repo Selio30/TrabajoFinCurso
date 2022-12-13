@@ -12,7 +12,10 @@ public class DatabaseViewModel extends ViewModel {
 
     public Database getDatabase(Context context) {
         if (database == null) {
-            database = Room.databaseBuilder(context, Database.class, "database.db").allowMainThreadQueries().fallbackToDestructiveMigration().build();
+            database = Room.databaseBuilder(context, Database.class, "database.db")
+                    .allowMainThreadQueries()
+                    .fallbackToDestructiveMigration()
+                    .build();
         }
         return database;
     }
