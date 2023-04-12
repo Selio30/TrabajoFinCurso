@@ -98,8 +98,6 @@ public class LoginFragment extends Fragment {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     progressBar.setVisibility(View.GONE);
-                    Toast.makeText(getContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
-                    Log.d("ERROR", error.getMessage());
                 }
             }) {
                 @Nullable
