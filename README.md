@@ -1,6 +1,6 @@
 # TrabajoFinCurso
  
-Proyecto Final de Curso 2k22
+Proyecto Final de Curso 2022
 
 By. Sergio Barbero Romero
 
